@@ -1,6 +1,7 @@
 package com.neha.ShoppingCart.utils;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -17,12 +18,13 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
+   // private String SECRET = "5367566B59703373367639792F423F4538482B4D6251655468576D5A713474375367566B59703373367639792F";
 
 
-    public static final String SECRET = "5gPjUq7v9z@KkReTgWhZq4t7SgVkYp3s6v9y/B?E(H+MbQeThWmZq4t7SgVkYp3s";
+     public static final String SECRET = "413F4428472B4B6250655368566D5970337336763979244226452948404D6351";
     public String generateToken(String username){
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        return createToken(claims,username);
     }
 
     public String createToken(Map<String, Object> claims, String username){
@@ -39,10 +41,15 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keybytes);
     }
 
-    public String extractUsername(String token){
 
+public String extractUsername(String token) {
+    try {
         return extractClaims(token, Claims::getSubject);
+    } catch (JwtException e) {
+
+        return null;
     }
+}
 
     public <T> T extractClaims(String token, Function<Claims, T> claimsResolver){
         final Claims claims = extractAllClaims(token);

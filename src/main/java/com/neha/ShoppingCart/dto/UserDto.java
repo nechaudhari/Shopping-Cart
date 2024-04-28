@@ -10,17 +10,7 @@ public class UserDto {
     private String email;
     private String name;
     private UserRole userRole;
-
-    public UserDto(Long id, String email, String name, UserRole userRole) {
-        this.id = id;
-        this.email = email;
-        this.name = name;
-        this.userRole = userRole;
-    }
-
-    public UserDto() {
-
-    }
+    private String password;
 
     public Long getId() {
         return id;
@@ -54,6 +44,25 @@ public class UserDto {
         this.userRole = userRole;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public UserDto(Long id, String email, String name, UserRole userRole, String password) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.userRole = userRole;
+        this.password = password;
+    }
+
+    public UserDto() {
+    }
+
     @Override
     public String toString() {
         return "UserDto{" +
@@ -61,6 +70,7 @@ public class UserDto {
                 ", email='" + email + '\'' +
                 ", name='" + name + '\'' +
                 ", userRole=" + userRole +
+                ", password='" + password + '\'' +
                 '}';
     }
 }

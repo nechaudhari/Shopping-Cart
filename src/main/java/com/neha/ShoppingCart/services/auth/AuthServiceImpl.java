@@ -6,6 +6,7 @@ import com.neha.ShoppingCart.entity.User;
 import com.neha.ShoppingCart.enums.UserRole;
 import com.neha.ShoppingCart.repository.UserRepository;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,19 +29,21 @@ public class AuthServiceImpl implements AuthService {
         user.setName(signupRequest.getName());
         user.setPassword(new BCryptPasswordEncoder().encode(signupRequest.getPassword()));
         user.setRole(UserRole.CUSTOMER);
-        User createUser = userRepository.save(user);
+        User createdUser = userRepository.save(user);
 
         UserDto userDto = new UserDto();
-        userDto.setId(createUser.getId());
+        userDto.setId(createdUser.getId());
 
         return userDto;
     }
 
     @Override
     public Boolean hasUserWithEmail(String email){
+
         return userRepository.findFirstByEmail(email).isPresent();
     }
 
+    @PostConstruct
     public void createAdminAccount(){
         User adminAccount = userRepository.findByRole(UserRole.ADMIN);
         if(null == adminAccount){
