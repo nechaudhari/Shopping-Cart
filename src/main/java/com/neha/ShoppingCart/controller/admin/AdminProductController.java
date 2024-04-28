@@ -11,18 +11,18 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping
 @RequiredArgsConstructor
 public class AdminProductController {
     private  final AdminProductService adminProductService;
 
-    @PostMapping("/product")
+    @PostMapping("/admin/product")
     public ResponseEntity<ProductDto> addProduct(@ModelAttribute ProductDto productDto) throws IOException {
         ProductDto productDto1 = adminProductService.addProduct(productDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(productDto1);
     }
 
-    @GetMapping("/products")
+    @GetMapping("/admin/products")
     public ResponseEntity<List<ProductDto>> getAllProducts(){
         List<ProductDto> productDtos = adminProductService.getAllProducts();
         return ResponseEntity.ok(productDtos);
