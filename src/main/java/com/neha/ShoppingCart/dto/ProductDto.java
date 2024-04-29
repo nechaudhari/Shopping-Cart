@@ -26,13 +26,14 @@ public class ProductDto {
     public ProductDto() {
     }
 
-    public ProductDto(Long id, String name, Long price, String description, byte[] byteImg, Long categoryId, MultipartFile img) {
+    public ProductDto(Long id, String name, Long price, String description, byte[] byteImg, Long categoryId, MultipartFile img, String categoryName) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.description = description;
         this.byteImg = byteImg;
         this.categoryId = categoryId;
+        this.categoryName = categoryName;
         this.img = img;
     }
 
@@ -92,6 +93,14 @@ public class ProductDto {
         this.img = img;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
     @Override
     public String toString() {
         return "ProductDto{" +
@@ -101,6 +110,7 @@ public class ProductDto {
                 ", description='" + description + '\'' +
                 ", byteImg=" + Arrays.toString(byteImg) +
                 ", categoryId=" + categoryId +
+                ", categoryName='" + categoryName + '\'' +
                 ", img=" + img +
                 '}';
     }

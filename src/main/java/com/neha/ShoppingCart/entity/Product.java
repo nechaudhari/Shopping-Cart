@@ -22,14 +22,10 @@ public class Product {
 
     private Long price;
 
-    private  String categoryName;
+    private String categoryName;
 
     @Lob
     private String description;
-
-    public Product(String categoryName) {
-        this.categoryName = categoryName;
-    }
 
     @Lob
     @Column(columnDefinition = "longblob")
@@ -51,6 +47,19 @@ public class Product {
         productDto.setCategoryId(category.getId());
         productDto.setCategoryName(category.getName());
         return productDto;
+    }
+
+    public Product() {
+    }
+
+    public Product(Long id, String name, Long price, String categoryName, String description, byte[] img, Category category) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.categoryName = categoryName;
+        this.description = description;
+        this.img = img;
+        this.category = category;
     }
 
     public Long getId() {
@@ -77,6 +86,14 @@ public class Product {
         this.price = price;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -87,21 +104,6 @@ public class Product {
 
     public byte[] getImg() {
         return img;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    @Override
-    public String toString() {
-        return "Product{" +
-                "category=" + category +
-                '}';
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
     }
 
     public void setImg(byte[] img) {
@@ -116,16 +118,16 @@ public class Product {
         this.category = category;
     }
 
-    public Product() {
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", categoryName='" + categoryName + '\'' +
+                ", description='" + description + '\'' +
+                ", img=" + Arrays.toString(img) +
+                ", category=" + category +
+                '}';
     }
-
-    public Product(Long id, String name, Long price, String description, byte[] img, Category category) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.description = description;
-        this.img = img;
-        this.category = category;
-    }
-
 }
