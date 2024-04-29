@@ -2,8 +2,11 @@ package com.neha.ShoppingCart.services.auth;
 
 import com.neha.ShoppingCart.dto.SignupRequest;
 import com.neha.ShoppingCart.dto.UserDto;
+import com.neha.ShoppingCart.entity.Order;
 import com.neha.ShoppingCart.entity.User;
+import com.neha.ShoppingCart.enums.OrderStatus;
 import com.neha.ShoppingCart.enums.UserRole;
+import com.neha.ShoppingCart.repository.OrderRepository;
 import com.neha.ShoppingCart.repository.UserRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -21,6 +24,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
+    private OrderRepository orderRepository;
+
     @Override
     public UserDto createUser(SignupRequest signupRequest){
         User user = new User();
@@ -30,6 +36,15 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(new BCryptPasswordEncoder().encode(signupRequest.getPassword()));
         user.setRole(UserRole.CUSTOMER);
         User createdUser = userRepository.save(user);
+
+        Order order = new Order();
+        order.setAmount(0L);
+        order.setTotalAmount(0L);
+        order.setDiscount(0L);
+        order.setUser(createdUser);
+        order.setOrderStatus(OrderStatus.Pending);
+        orderRepository.save(order);
+
 
         UserDto userDto = new UserDto();
         userDto.setId(createdUser.getId());
