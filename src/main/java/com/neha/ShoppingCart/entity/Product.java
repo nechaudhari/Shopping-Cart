@@ -22,8 +22,14 @@ public class Product {
 
     private Long price;
 
+    private  String categoryName;
+
     @Lob
     private String description;
+
+    public Product(String categoryName) {
+        this.categoryName = categoryName;
+    }
 
     @Lob
     @Column(columnDefinition = "longblob")
@@ -43,6 +49,7 @@ public class Product {
         productDto.setDescription(description);
         productDto.setByteImg(img);
         productDto.setCategoryId(category.getId());
+        productDto.setCategoryName(category.getName());
         return productDto;
     }
 
@@ -82,6 +89,21 @@ public class Product {
         return img;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "category=" + category +
+                '}';
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
     public void setImg(byte[] img) {
         this.img = img;
     }
@@ -106,15 +128,4 @@ public class Product {
         this.category = category;
     }
 
-    @Override
-    public String toString() {
-        return "Product{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", description='" + description + '\'' +
-                ", img=" + Arrays.toString(img) +
-                ", category=" + category +
-                '}';
-    }
 }
