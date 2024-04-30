@@ -39,7 +39,7 @@ public class Order {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItems> cartItems;
 
     public Order() {
