@@ -5,15 +5,10 @@ import com.neha.ShoppingCart.dto.AddProductInCartDto;
 import com.neha.ShoppingCart.dto.CartItemsDto;
 import com.neha.ShoppingCart.dto.CategoryDto;
 import com.neha.ShoppingCart.dto.OrderDto;
-import com.neha.ShoppingCart.entity.CartItems;
-import com.neha.ShoppingCart.entity.Order;
-import com.neha.ShoppingCart.entity.Product;
-import com.neha.ShoppingCart.entity.User;
+import com.neha.ShoppingCart.entity.*;
 import com.neha.ShoppingCart.enums.OrderStatus;
-import com.neha.ShoppingCart.repository.CartItemsRepository;
-import com.neha.ShoppingCart.repository.OrderRepository;
-import com.neha.ShoppingCart.repository.ProductRepository;
-import com.neha.ShoppingCart.repository.UserRepository;
+import com.neha.ShoppingCart.exceptions.ValidationException;
+import com.neha.ShoppingCart.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,70 +35,38 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private CouponRepository couponRepository;
+
     @Override
     public ResponseEntity<?> addProductToCart(AddProductInCartDto addProductInCartDto) {
-
-
-//        if(optionalCartItems.isPresent()){
-//            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
-//        }else{
-//            Optional<Product> optionalProduct = productRepository.findById(addProductInCartDto.getProductId());
-//            Optional<User> optionalUser = userRepository.findById(addProductInCartDto.getUserId());
-//
-//            if(optionalProduct.isPresent() && optionalUser.isPresent()){
-//                CartItems cart = new CartItems();
-//                cart.setProduct(optionalProduct.get());
-//                cart.setPrice(optionalProduct.get().getPrice());
-//                cart.setQuantity(1L);
-//                cart.setUser(optionalUser.get());
-//                cart.setOrder(activeOrder);
-//
-//                CartItems updatedCart = cartItemsRepository.save(cart);
-//
-//                activeOrder.setTotalAmount(activeOrder.getTotalAmount() + cart.getPrice() );
-//                activeOrder.setAmount(activeOrder.getAmount() + cart.getPrice() );
-//                activeOrder.getCartItems().add(cart);
-//
-//                orderRepository.save(activeOrder);
-//
-//                return ResponseEntity.status(HttpStatus.CREATED).body(cart);
-//
-//            }else{
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or Product not found");
-//            }
-//       }
         try {
-            // Find active order or create a new one
             Order activeOrder = orderRepository.findByUserIdAndOrderStatus(
                     addProductInCartDto.getUserId(), OrderStatus.Pending);
 
             if (activeOrder == null) {
-                // Create a new order if no active order found
                 activeOrder = new Order();
                 User user = userRepository.findById(addProductInCartDto.getUserId())
                         .orElseThrow(() -> new RuntimeException("User not found"));
                 activeOrder.setUser(user);
                 activeOrder.setOrderStatus(OrderStatus.Pending);
                 activeOrder.setDate(new Date());
-                activeOrder.setAmount(0L); // Initial amount
-                activeOrder.setTotalAmount(0L); // Initial total amount
+                activeOrder.setAmount(0L);
+                activeOrder.setTotalAmount(0L);
                 activeOrder = orderRepository.save(activeOrder);
             }
 
-            // Find the product to add to cart
             Product product = productRepository.findById(addProductInCartDto.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
 
-            // Create cart item and save to database
             CartItems cartItem = new CartItems();
             cartItem.setProduct(product);
             cartItem.setPrice(product.getPrice());
-            cartItem.setQuantity(1L); // Assuming adding one quantity for now
+            cartItem.setQuantity(1L);
             cartItem.setUser(activeOrder.getUser());
             cartItem.setOrder(activeOrder);
             cartItemsRepository.save(cartItem);
 
-            // Update order total amount
             activeOrder.setTotalAmount(activeOrder.getTotalAmount() + product.getPrice());
             activeOrder.setAmount(activeOrder.getAmount() + product.getPrice());
             orderRepository.save(activeOrder);
@@ -130,11 +93,43 @@ public class CartServiceImpl implements CartService {
             orderDto.setTotalAmount(activeOrder.getTotalAmount());
             orderDto.setCartItems(cartItemsDtoList);
 
+            if(activeOrder.getCoupon() != null){
+                orderDto.setCouponName(activeOrder.getCoupon().getName());
+            }
+
             return orderDto;
         } catch (Exception e) {
             throw new RuntimeException("Error fetching cart: " + e.getMessage());
         }
     }
+
+    public OrderDto applyCoupon(Long userId, String code){
+        Order activeOrder = orderRepository.findByUserIdAndOrderStatus(userId, OrderStatus.Pending);
+        Coupon coupon = couponRepository.findByCode(code).orElseThrow(() -> new ValidationException("Coupon not found"));
+
+        if(couponIsExpired(coupon)){
+            throw new ValidationException("Coupon has expired");
+        }
+
+        double discountAmount = ((coupon.getDiscount() / 100.0) * activeOrder.getTotalAmount());
+        double netAmount = activeOrder.getTotalAmount() - discountAmount;
+
+        activeOrder.setAmount((long)netAmount);
+        activeOrder.setDiscount((long)discountAmount);
+        activeOrder.setCoupon(coupon);
+
+        orderRepository.save(activeOrder);
+        return activeOrder.getOrderDto();
+    }
+
+    private boolean couponIsExpired(Coupon coupon){
+        Date currentDate = new Date();
+        Date expirationDate = coupon.getExpirationDate();
+
+        return expirationDate != null && currentDate.after(expirationDate);
+    }
+
+
 
 
 }

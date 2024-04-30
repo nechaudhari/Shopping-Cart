@@ -1,5 +1,6 @@
 package com.neha.ShoppingCart.entity;
 
+import com.neha.ShoppingCart.dto.OrderDto;
 import com.neha.ShoppingCart.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -39,8 +40,29 @@ public class Order {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "coupon_id", referencedColumnName = "id")
+    private Coupon coupon;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItems> cartItems;
+
+    public OrderDto getOrderDto(){
+        OrderDto orderDto = new OrderDto();
+
+        orderDto.setId(id);
+        orderDto.setOrderDescription(orderDescription);
+        orderDto.setAddress(address);
+        orderDto.setTrackingId(trackingId);
+        orderDto.setAmount(amount);
+        orderDto.setDate(date);
+        orderDto.setOrderStatus(orderStatus);
+        orderDto.setUserName(user.getName());
+        if(coupon != null){
+            orderDto.setCouponName(coupon.getName());
+        }
+        return orderDto;
+    }
 
     public Order() {
     }
